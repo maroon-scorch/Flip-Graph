@@ -103,6 +103,43 @@ def visualize_polygon(poly):
 
     plt.show()
 
+def is_line_on_polygon(segment, poly):
+    # Alternative version
+    line = geometry.LineString((segment[0].vec, segment[1].vec))
+    polygon = poly.shapely_polygon
+    boundary = geometry.LineString(list(polygon.exterior.coords))
+    intersections_1 = boundary.intersection(line)
+    intersections_2 = polygon.intersection(line)
+    
+def is_diagonal_in_polygon(start, end, poly):
+    """ Checks if a given diagonal line from start to end is contained in the polygon.
+    The line segment minus the end point should be in the interior of the polygon """
+    
+    # if the two index are neighbors, they technically count...
+    
+    if (start - end - 1) % poly.n == 0 or (start - end + 1) % poly.n == 0:
+        return True
+    
+    s = poly.vertice[start]
+    e = poly.vertice[end]
+    line = geometry.LineString((s.vec, e.vec))
+    polygon = poly.shapely_polygon
+    boundary = geometry.LineString(list(polygon.exterior.coords))
+    
+    intersections = boundary.intersection(line)
+    
+    temp = intersections.difference(geometry.Point(s.x, s.y))
+    temp = temp.difference(geometry.Point(e.x, e.y))
+    
+    if temp.is_empty:
+        # The line segment is either completely inside or completely outside
+        mid = midpoint(s, e)
+        shapely_mid = geometry.Point(mid.x, mid.y)
+        return polygon.contains(shapely_mid)
+    else:
+        # The line segment crosses boundary
+        return False
+
 def is_line_segment_in_polygon(segment, poly):
     line = geometry.LineString((segment[0].vec, segment[1].vec))
     polygon = poly.shapely_polygon
@@ -128,7 +165,7 @@ def is_line_segment_in_polygon(segment, poly):
         shapely_mid = geometry.Point(mid.x, mid.y)
 
         # If it is, then it can't intersect on the boundary because temp is empty
-        if not polygon.contains(shapely_mid):
+        if (not polygon.contains(shapely_mid)) and (not boundary.contains(shapely_mid)):
             # If this midpoint is outside the polygon, this is false
             return False
         else:
@@ -263,7 +300,7 @@ class Triangulation:
             line_1 = (fixed_base[0], current_vertex)
             line_2 = (fixed_base[1], current_vertex)
             
-            if is_line_segment_in_polygon(line_1, poly) and is_line_segment_in_polygon(line_2, poly):
+            if is_diagonal_in_polygon(0, i, poly) and is_diagonal_in_polygon(1, i, poly):
                 # This means that this is a valid triangle!
                 if i == 2:
                     diagonals = [line_1]
@@ -316,7 +353,11 @@ if __name__ == "__main__":
     # square = Polygon(4, [Point(0, 0), Point(0, 1), Point(1, 1), Point(1, 0)])
     # print(is_line_segment_in_polygon([Point(0, 0,), Point(1, 1.1)], square))
     # polygon = Polygon(5, [Point(0, 0), Point(2, 0), Point(2, 2), Point(1, 1), Point(0, 2)])
-    polygon = regular_polygon(6)
+    # is_line_segment_in_polygon([Point(0, 2), Point(1.1, 0.9)], polygon)
+    # polygon = regular_polygon(6)
+    polygon = Polygon(6, [Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(1, 1), Point(0, 1)])
+    
+    
     visualize_polygon(polygon)
     trig = Triangulation()
     

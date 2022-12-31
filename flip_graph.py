@@ -70,7 +70,7 @@ def diagonals_to_triangles(diagonals, n):
     for t in triangles:
         t.sort()
         
-    assert len(triangles) & 2 == 0
+    assert len(triangles) % 2 == 0
     
     return triangles[::2], graph
     
@@ -155,8 +155,9 @@ def flip_graph(poly):
     return graph
 
 if __name__ == "__main__":
-    polygon = regular_polygon(6)
-    # polygon = Polygon(5, [Point(0, 0), Point(2, 0), Point(2, 2), Point(1, 1), Point(0, 2)])
+    # polygon = regular_polygon(5)
+    # polygon = Polygon(6, [Point(0, 0), Point(1, 0), Point(2, 0), Point(2, 1), Point(1, 1), Point(0, 1)])
+    polygon = Polygon(5, [Point(0, 0), Point(2, 0), Point(2, 2), Point(1, 1), Point(0, 2)])
     visualize_polygon(polygon)
     graph = flip_graph(polygon)
     print(graph)
