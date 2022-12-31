@@ -48,7 +48,7 @@ def diagonals_to_triangles(diagonals, n):
     """ Given a list of diagonals on a polygon that forms the triangulation,
     returns the list of triangles divided by this. """
     
-    print(diagonals)
+    # print(diagonals)
     # Creates a graph based on the information
     graph = {}
     # Maybe we could switch set to list later (no uniqueness issues)
@@ -57,7 +57,7 @@ def diagonals_to_triangles(diagonals, n):
     for i, j in diagonals:
         graph[i].add(j)
         graph[j].add(i)
-    print(graph)
+    # print(graph)
     
     # A triangle is equivalent to a cycle of length 3 in this graph
     triangles = []
@@ -98,17 +98,14 @@ def find_quadrilateral(d, triangles, n, graph):
     print("Shouldn't reach here")
     
 
-def has_edge(trig_1, trig_2, poly):
+def has_edge(trig_1, trig_2, n, triangles, graph):
     """ Determines if there's an edge between Trig 1 and Trig 2"""
-    
-    # for d_start, d_end in trig_1:
-    triangles, graph = diagonals_to_triangles(trig_1, poly.n)
-    
-    print(trig_1)
-    print(trig_2)
+
+    # print(trig_1)
+    # print(trig_2)
     
     for d in trig_1:
-        i, j, _, _ = find_quadrilateral(d, triangles, poly.n, graph)
+        i, j, _, _ = find_quadrilateral(d, triangles, n, graph)
         t1 = copy.deepcopy(trig_1)
         t2 = copy.deepcopy(trig_2)
         t1.remove(d)
@@ -118,7 +115,7 @@ def has_edge(trig_1, trig_2, poly):
         else:
             t1.append((j, i))
         
-        t1.sort(key = lambda x: x[0] + (1/poly.n)*x[1])
+        t1.sort(key = lambda x: x[0] + (1/n)*x[1])
         if t1 == t2:
             return True
     
@@ -142,15 +139,21 @@ def flip_graph(poly):
         index_triangulations.append(input)
     
     print(index_triangulations)
+    print("Finsihed Triangulation")
+    print("Number of Triangulations: ", len(index_triangulations))
         
     for i in range(length):
         graph[i] = []
         
     for i in range(length):
+        print(i)
+        triangles, g_dict = diagonals_to_triangles(index_triangulations[i], poly.n)
         for j in range(i + 1, length):
-            if has_edge(index_triangulations[i], index_triangulations[j], poly):
+            if has_edge(index_triangulations[i], index_triangulations[j], poly.n, triangles, g_dict):
                 graph[i].append(j)
                 graph[j].append(i)
+    
+    print("Finished Making Graph")
     
     return graph
 
