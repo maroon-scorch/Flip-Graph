@@ -70,9 +70,35 @@ class Polygon:
         # If the polygons are simple, and the inputs fulfills the type promise
         # This should be enough (TODO: Check this)
         return self.n == other.n and set(self.vertice) == set(other.vertice)
-
+    
     def __hash__(self):
       return hash(self.shapely_polygon)
+  
+    def is_convex(self):
+        ang_list = []
+        points = self.vertice
+        for idx, pt in enumerate(points):
+            if idx < len(points) - 2:
+                ang_list.append([pt, points[idx + 1], points[idx + 2]])
+        
+        ang_list.append([points[-2], points[-1], points[0]])
+        ang_list.append([points[-1], points[0], points[1]])
+        
+        sign_set = set()
+        for p1, p2, p3 in ang_list:
+            sign = cross_product_sign(p1, p2, p3)
+            sign_set.add(sign)
+        
+        return len(sign_set) == 1
+
+def unit_vector(vector):
+    """ Scales the vector to a unit vector """
+    return vector / np.linalg.norm(vector)
+
+def cross_product_sign(p1, p2, p3):
+    """ Given 3 points, find the angle at p2 formed by the 3 points """
+    product = (p2.x - p1.x)*(p3.y - p2.y) - (p2.y - p1.y)*(p3.x - p2.x)
+    return np.sign(product)
 
 def int_between(x, y):
     if x < y:

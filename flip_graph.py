@@ -107,7 +107,6 @@ def has_edge(trig_1, trig_2, n, triangles, graph):
     for d in trig_1:
         i, j, _, _ = find_quadrilateral(d, triangles, n, graph)
         t1 = copy.deepcopy(trig_1)
-        t2 = copy.deepcopy(trig_2)
         t1.remove(d)
         
         if i < j:
@@ -116,10 +115,27 @@ def has_edge(trig_1, trig_2, n, triangles, graph):
             t1.append((j, i))
         
         t1.sort(key = lambda x: x[0] + (1/n)*x[1])
-        if t1 == t2:
+        if t1 == trig_2:
             return True
     
     return False
+
+def create_flip_list(trig, n, triangles, graph):
+    output = []
+    for d in trig:
+        i, j, _, _ = find_quadrilateral(d, triangles, n, graph)
+        t1 = copy.deepcopy(trig)
+        t1.remove(d)
+        
+        if i < j:
+            t1.append((i, j))
+        else:
+            t1.append((j, i))
+        
+        t1.sort(key = lambda x: x[0] + (1/n)*x[1])
+        output.append(t1)
+    return output
+    
 
 def flip_graph(poly):
     """ Generates the flip graph of a given polygon """
@@ -148,8 +164,10 @@ def flip_graph(poly):
     for i in range(length):
         print(i)
         triangles, g_dict = diagonals_to_triangles(index_triangulations[i], poly.n)
+        modified_list = create_flip_list(index_triangulations[i], poly.n, triangles, g_dict)
         for j in range(i + 1, length):
-            if has_edge(index_triangulations[i], index_triangulations[j], poly.n, triangles, g_dict):
+            if index_triangulations[j] in modified_list:
+            # if has_edge(index_triangulations[i], index_triangulations[j], poly.n, triangles, g_dict):
                 graph[i].append(j)
                 graph[j].append(i)
     
